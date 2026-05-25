@@ -182,7 +182,7 @@ body {
   padding: 8px 10px;
 }
 
-.stat-row:has(.icon-xp)     { background: #ede9ff; }
+.stat-row:has(.icon-xp)     { background: #e8f3ff; }
 .stat-row:has(.icon-hunger) { background: #fff0e8; }
 .stat-row:has(.icon-mood)   { background: #fce7f3; }
 
@@ -202,7 +202,7 @@ body {
   height: 20px;
 }
 
-.icon-xp     { background: #6c63ff; }
+.icon-xp     { background: #355c9f; }
 .icon-hunger { background: #f97316; }
 .icon-mood   { background: #ec4899; }
 
@@ -256,7 +256,7 @@ body {
   transition: width 0.4s ease;
 }
 
-.bar-fill.xp     { background: linear-gradient(90deg, #6c63ff, #a78bfa); }
+.bar-fill.xp     { background: linear-gradient(90deg, #355c9f, #7aadd4); }
 .bar-fill.hunger { background: linear-gradient(90deg, #f97316, #fb923c); }
 .bar-fill.mood   { background: linear-gradient(90deg, #ec4899, #f472b6); }
 
@@ -332,7 +332,7 @@ body {
 /* Task card (session modal) */
 .task-card {
   background: #16213e;
-  border: 1px solid #2d2b55;
+  border: 1px solid #142d58;
   border-radius: 12px;
   padding: 14px;
   display: flex;
@@ -364,7 +364,7 @@ body {
 .task-input {
   width: 100%;
   background: #1a1a2e;
-  border: 1px solid #2d2b55;
+  border: 1px solid #142d58;
   border-radius: 8px;
   padding: 8px 10px;
   color: #e0e0e0;
@@ -374,7 +374,7 @@ body {
 }
 
 .task-input:focus {
-  border-color: #6c63ff;
+  border-color: #355c9f;
 }
 
 .duration-options {
@@ -386,7 +386,7 @@ body {
   flex: 1;
   padding: 6px 0;
   background: #1a1a2e;
-  border: 1px solid #2d2b55;
+  border: 1px solid #142d58;
   border-radius: 8px;
   color: #9ca3af;
   font-size: 12px;
@@ -398,15 +398,15 @@ body {
 
 .duration-btn.active,
 .duration-btn:hover {
-  background: #2d2b55;
-  border-color: #6c63ff;
-  color: #c4b5fd;
+  background: #142d58;
+  border-color: #355c9f;
+  color: #7aadd4;
 }
 
 .start-btn {
   width: 100%;
   padding: 10px;
-  background: #6c63ff;
+  background: #355c9f;
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -417,9 +417,9 @@ body {
   transition: background 0.15s;
 }
 
-.start-btn:hover { background: #5a52d5; }
+.start-btn:hover { background: #1e3a70; }
 .start-btn:disabled {
-  background: #2d2b55;
+  background: #142d58;
   color: #6b7280;
   cursor: not-allowed;
 }
@@ -433,14 +433,14 @@ body {
 
 .active-task-label {
   font-weight: 600;
-  color: #c4b5fd;
+  color: #7aadd4;
   font-size: 15px;
 }
 
 .countdown {
   font-size: 28px;
   font-weight: 700;
-  color: #a78bfa;
+  color: #7aadd4;
   letter-spacing: 1px;
   text-align: center;
   padding: 4px 0;
@@ -450,7 +450,7 @@ body {
   width: 100%;
   padding: 10px;
   background: transparent;
-  border: 1px solid #4c3f8a;
+  border: 1px solid #355c9f;
   border-radius: 8px;
   color: #9ca3af;
   font-size: 14px;
