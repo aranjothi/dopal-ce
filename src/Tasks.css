@@ -436,6 +436,13 @@
   width: 52px;
 }
 
+.date-error {
+  font-size: 10px;
+  font-weight: 600;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
 .seg-sep {
   font-size: 14px;
   font-weight: 700;

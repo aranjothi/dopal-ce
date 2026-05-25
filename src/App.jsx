@@ -8,6 +8,7 @@ import sad       from './assets/pet/sad.png'
 import angry     from './assets/pet/angry.png'
 import upset     from './assets/pet/upset.png'
 import coinImg   from './assets/ui/coin.png'
+import treatImg  from './assets/ui/treat.png'
 import emptyBowl from './assets/ui/empty_bowl.png'
 import fewBowl   from './assets/ui/few_bowl.png'
 import fullBowl  from './assets/ui/full_bowl.png'
@@ -264,7 +265,13 @@ export default function App() {
       </div>
 
       <div className="pet-sprite-wrapper">
-        <img className="treat-bowl" src={getTreatBowl(coins)} alt="treat bowl" />
+        <div className="treat-group">
+          <img className="treat-bowl" src={getTreatBowl(coins)} alt="treat bowl" />
+          <div className="treat-label">
+            <img src={treatImg} alt="treat" className="treat-icon" />
+            <span>{coins}</span>
+          </div>
+        </div>
         <img className={`pet-sprite ${getRockClass(pet.mood)}`} src={getMoodImage(pet.mood)} alt="pet" />
       </div>
 

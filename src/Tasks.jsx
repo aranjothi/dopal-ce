@@ -76,6 +76,15 @@ function buildDueDate(month, day, year) {
   return `${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 }
 
+function isDatePast(dateStr) {
+  if (!dateStr) return false
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date < today
+}
+
 const TASK_COLORS = [
   { name: 'Red',    hex: '#fca5a5', dark: '#7f1d1d' },
   { name: 'Orange', hex: '#fdba74', dark: '#7c2d12' },
@@ -101,21 +110,25 @@ function NewModal({ onClose, onSave, editTask }) {
   const [numInt, setNumInt]           = useState(editTask?.numIntervals  ?? 4)
 
   // Time allotted: HH : MM : SS
-  const parsedTime = (editTask?.timeAllotted ?? '00:00:00').split(':')
+  const parsedTime = (editTask?.timeAllotted ?? '00:15:00').split(':')
   const [tH, setTH] = useState(parsedTime[0] ?? '00')
   const [tM, setTM] = useState(parsedTime[1] ?? '00')
   const [tS, setTS] = useState(parsedTime[2] ?? '00')
 
   // Due date: MM / DD / YYYY
   const parsedDate = editTask?.dueDate ? editTask.dueDate.split('-') : ['', '', '']
+  const [dueDateOn, setDueDateOn] = useState(!!editTask?.dueDate)
   const [dYear,  setDYear]  = useState(parsedDate[0] ?? '')
   const [dMonth, setDMonth] = useState(parsedDate[1] ? String(parseInt(parsedDate[1])) : '')
   const [dDay,   setDDay]   = useState(parsedDate[2] ? String(parseInt(parsedDate[2])) : '')
 
+  const builtDate   = dueDateOn ? buildDueDate(dMonth, dDay, dYear) : ''
+  const datePastErr = builtDate && isDatePast(builtDate) && builtDate !== (editTask?.dueDate ?? '')
+
   function handleSave() {
     if (!title.trim()) return
     const timeAllotted = `${tH.padStart(2,'0')}:${tM.padStart(2,'0')}:${tS.padStart(2,'0')}`
-    const dueDate = buildDueDate(dMonth, dDay, dYear)
+    const dueDate = builtDate
     const base = { type, title: title.trim(), description: description.trim(), dueDate, color }
     const data = type === 'task'
       ? { ...base, timeAllotted }
@@ -129,13 +142,19 @@ function NewModal({ onClose, onSave, editTask }) {
     onSave(data)
   }
 
+  const backdropDown = useRef(false)
+
   function handleClose() {
     setClosing(true)
     setTimeout(() => onClose(), 180)
   }
 
   return (
-    <div className={`modal-backdrop ${closing ? 'backdrop-out' : 'backdrop-in'}`} onClick={handleClose}>
+    <div
+      className={`modal-backdrop ${closing ? 'backdrop-out' : 'backdrop-in'}`}
+      onMouseDown={e => { backdropDown.current = e.target === e.currentTarget }}
+      onClick={() => { if (backdropDown.current) handleClose() }}
+    >
       <div className={`new-modal ${closing ? 'modal-out' : 'modal-in'}`} onClick={e => e.stopPropagation()}>
         <div className="type-pill">
           <button className={`type-btn ${type === 'task'    ? 'active' : ''}`} onClick={() => setType('task')}>Task</button>
@@ -173,7 +192,7 @@ function NewModal({ onClose, onSave, editTask }) {
           {type === 'task' ? (
             <div key="task" className="form-section-enter">
               <div className="modal-field-group">
-                <span className="modal-label">Time Allotted</span>
+                <span className="modal-label">Time to Allot</span>
                 <div className="time-input-group">
                   <input className="modal-input seg-input" maxLength={2} placeholder="00" value={tH} onChange={e => setTH(numericOnly(e.target.value, 2))} />
                   <span className="seg-sep">:</span>
@@ -183,27 +202,47 @@ function NewModal({ onClose, onSave, editTask }) {
                 </div>
               </div>
               <div className="modal-field-group">
-                <span className="modal-label">Due Date</span>
-                <div className="date-input-group">
-                  <input className="modal-input seg-input" maxLength={2} placeholder="MM" value={dMonth} onChange={e => setDMonth(numericOnly(e.target.value, 2))} />
-                  <span className="seg-sep">/</span>
-                  <input className="modal-input seg-input" maxLength={2} placeholder="DD" value={dDay} onChange={e => setDDay(numericOnly(e.target.value, 2))} />
-                  <span className="seg-sep">/</span>
-                  <input className="modal-input seg-input year" maxLength={4} placeholder="YYYY" value={dYear} onChange={e => setDYear(numericOnly(e.target.value, 4))} />
+                <div className="breaks-row">
+                  <span className="modal-label">Due Date</span>
+                  <div className="toggle-pill">
+                    <button className={`toggle-btn ${dueDateOn  ? 'active' : ''}`} onClick={() => setDueDateOn(true)}>On</button>
+                    <button className={`toggle-btn ${!dueDateOn ? 'active' : ''}`} onClick={() => setDueDateOn(false)}>Off</button>
+                  </div>
                 </div>
+                {dueDateOn && (
+                  <div className="form-section-enter">
+                    <div className="date-input-group">
+                      <input className="modal-input seg-input" maxLength={2} placeholder="MM" value={dMonth} onChange={e => setDMonth(numericOnly(e.target.value, 2))} />
+                      <span className="seg-sep">/</span>
+                      <input className="modal-input seg-input" maxLength={2} placeholder="DD" value={dDay} onChange={e => setDDay(numericOnly(e.target.value, 2))} />
+                      <span className="seg-sep">/</span>
+                      <input className="modal-input seg-input year" maxLength={4} placeholder="YYYY" value={dYear} onChange={e => setDYear(numericOnly(e.target.value, 4))} />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
             <div key="session" className="form-section-enter">
               <div className="modal-field-group">
-                <span className="modal-label">Due Date</span>
-                <div className="date-input-group">
-                  <input className="modal-input seg-input" maxLength={2} placeholder="MM" value={dMonth} onChange={e => setDMonth(numericOnly(e.target.value, 2))} />
-                  <span className="seg-sep">/</span>
-                  <input className="modal-input seg-input" maxLength={2} placeholder="DD" value={dDay} onChange={e => setDDay(numericOnly(e.target.value, 2))} />
-                  <span className="seg-sep">/</span>
-                  <input className="modal-input seg-input year" maxLength={4} placeholder="YYYY" value={dYear} onChange={e => setDYear(numericOnly(e.target.value, 4))} />
+                <div className="breaks-row">
+                  <span className="modal-label">Due Date</span>
+                  <div className="toggle-pill">
+                    <button className={`toggle-btn ${dueDateOn  ? 'active' : ''}`} onClick={() => setDueDateOn(true)}>On</button>
+                    <button className={`toggle-btn ${!dueDateOn ? 'active' : ''}`} onClick={() => setDueDateOn(false)}>Off</button>
+                  </div>
                 </div>
+                {dueDateOn && (
+                  <div className="form-section-enter">
+                    <div className="date-input-group">
+                      <input className="modal-input seg-input" maxLength={2} placeholder="MM" value={dMonth} onChange={e => setDMonth(numericOnly(e.target.value, 2))} />
+                      <span className="seg-sep">/</span>
+                      <input className="modal-input seg-input" maxLength={2} placeholder="DD" value={dDay} onChange={e => setDDay(numericOnly(e.target.value, 2))} />
+                      <span className="seg-sep">/</span>
+                      <input className="modal-input seg-input year" maxLength={4} placeholder="YYYY" value={dYear} onChange={e => setDYear(numericOnly(e.target.value, 4))} />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="breaks-row">
                 <span className="modal-label">Breaks</span>
@@ -239,7 +278,13 @@ function NewModal({ onClose, onSave, editTask }) {
           )}
         </div>
 
-        <button className="modal-save-btn" onClick={handleSave} disabled={!title.trim()}>
+        <button className="modal-save-btn" onClick={handleSave} disabled={
+          !title.trim() ||
+          (type === 'task' && (parseInt(tH) || 0) + (parseInt(tM) || 0) + (parseInt(tS) || 0) === 0) ||
+          (type === 'session' && !breaks && duration < 1) ||
+          (type === 'session' && breaks && (studyInt < 1 || breakDur < 1 || numInt < 1)) ||
+          !!datePastErr
+        }>
           {editTask ? 'Save Changes' : 'Create'}
         </button>
       </div>
@@ -251,6 +296,7 @@ function NewModal({ onClose, onSave, editTask }) {
 
 function DeleteConfirm({ task, onConfirm, onCancel }) {
   const [closing, setClosing] = useState(false)
+  const backdropDown = useRef(false)
 
   function handleClose() {
     setClosing(true)
@@ -258,7 +304,11 @@ function DeleteConfirm({ task, onConfirm, onCancel }) {
   }
 
   return (
-    <div className={`modal-backdrop ${closing ? 'backdrop-out' : 'backdrop-in'}`} onClick={handleClose}>
+    <div
+      className={`modal-backdrop ${closing ? 'backdrop-out' : 'backdrop-in'}`}
+      onMouseDown={e => { backdropDown.current = e.target === e.currentTarget }}
+      onClick={() => { if (backdropDown.current) handleClose() }}
+    >
       <div className={`delete-modal ${closing ? 'modal-out' : 'modal-in'}`} onClick={e => e.stopPropagation()}>
         <p className="delete-title">Delete this {task.type}?</p>
         <p className="delete-subtitle">

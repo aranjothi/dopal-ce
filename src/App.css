@@ -288,12 +288,39 @@ body {
   height: 200px;
 }
 
-.treat-bowl {
+.treat-group {
   position: absolute;
   bottom: 0;
   left: 12px;
+}
+
+.treat-bowl {
   width: 83px;
   height: auto;
+}
+
+.treat-label {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a70;
+  background: #b1cff3;
+  border-radius: 99px;
+  padding: 0px 10px 0px 6px;
+  white-space: nowrap;
+}
+
+.treat-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  transform: rotate(45deg);
 }
 
 @keyframes pet-rock-full   { 0%,100%{transform:translateX(28px) rotate(-8deg)}   50%{transform:translateX(28px) rotate(5deg)}   }
