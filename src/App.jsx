@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
+import Tasks from './Tasks'
 import joyous    from './assets/pet/joyous.png'
 import happy     from './assets/pet/happy.png'
 import neutral   from './assets/pet/neutral.png'
@@ -142,6 +143,7 @@ export default function App() {
   const [selectedDuration, setSelectedDuration] = useState(DURATIONS[0])
   const [remaining, setRemaining] = useState(null)
   const [showSession, setShowSession] = useState(false)
+  const [showTasks, setShowTasks] = useState(false)
   const timerRef = useRef(null)
 
   useEffect(() => {
@@ -211,11 +213,11 @@ export default function App() {
             </svg>
             <span className="nav-label">Shop</span>
           </button>
-          <button className="nav-btn" title="Tasks">
+          <button className="nav-btn" title="To-Dos" onClick={() => setShowTasks(true)}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
               <path fillRule="evenodd" d="M10.5 3A1.501 1.501 0 0 0 9 4.5h6A1.5 1.5 0 0 0 13.5 3h-3Zm-2.693.178A3 3 0 0 1 10.5 1.5h3a3 3 0 0 1 2.694 1.678c.497.042.992.092 1.486.15 1.497.173 2.57 1.46 2.57 2.929V19.5a3 3 0 0 1-3 3H6.75a3 3 0 0 1-3-3V6.257c0-1.47 1.073-2.756 2.57-2.93.493-.057.989-.107 1.487-.15Z" clipRule="evenodd" />
             </svg>
-            <span className="nav-label">Tasks</span>
+            <span className="nav-label">To-Dos</span>
           </button>
           <button className="nav-btn" title="Settings">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -266,8 +268,11 @@ export default function App() {
         <img className={`pet-sprite ${getRockClass(pet.mood)}`} src={getMoodImage(pet.mood)} alt="pet" />
       </div>
 
+      {showTasks && (
+        <Tasks onClose={() => setShowTasks(false)} />
+      )}
 
-{showSession && (
+      {showSession && (
         <div className="session-overlay" onClick={() => setShowSession(false)}>
           <div className="task-card" onClick={e => e.stopPropagation()}>
             <h2>Session</h2>
