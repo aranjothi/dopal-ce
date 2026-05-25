@@ -5,9 +5,15 @@
   padding: 0;
 }
 
+html {
+  height: 442px;
+  overflow: hidden;
+  /* zoom: 0.95; */
+}
+
 body {
   width: 320px;
-  height: 477px;
+  height: 442px;
   background-color: #1a1a2e;
   background-image: url('./assets/ui/dopal_bg.png');
   background-size: 768px auto;
@@ -21,10 +27,11 @@ body {
 
 .app {
   padding: 14px;
+  padding-top: 8px;
   padding-bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0px;
 }
 
 /* Header */
@@ -285,12 +292,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 150px;
 }
 
 .treat-group {
   position: absolute;
-  bottom: 0;
+  bottom: 0px;
   left: 12px;
 }
 
@@ -323,16 +330,16 @@ body {
   transform: rotate(45deg);
 }
 
-@keyframes pet-rock-full   { 0%,100%{transform:translateX(28px) rotate(-8deg)}   50%{transform:translateX(28px) rotate(5deg)}   }
-@keyframes pet-rock-high   { 0%,100%{transform:translateX(28px) rotate(-6deg)}   50%{transform:translateX(28px) rotate(3.5deg)} }
-@keyframes pet-rock-medium { 0%,100%{transform:translateX(28px) rotate(-4deg)}   50%{transform:translateX(28px) rotate(2.5deg)} }
-@keyframes pet-rock-low    { 0%,100%{transform:translateX(28px) rotate(-1.5deg)} 50%{transform:translateX(28px) rotate(1deg)}   }
+@keyframes pet-rock-full   { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-8deg)}   50%{transform:translateX(28px) translateY(-15px) rotate(5deg)}   }
+@keyframes pet-rock-high   { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-6deg)}   50%{transform:translateX(28px) translateY(-15px) rotate(3.5deg)} }
+@keyframes pet-rock-medium { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-4deg)}   50%{transform:translateX(28px) translateY(-15px) rotate(2.5deg)} }
+@keyframes pet-rock-low    { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-1.5deg)} 50%{transform:translateX(28px) translateY(-15px) rotate(1deg)}   }
 
 .pet-sprite {
   position: absolute;
   width: 188px;
   height: auto;
-  transform: translateX(28px);
+  transform: translateX(28px) translateY(-15px);
   transform-origin: center bottom;
 }
 

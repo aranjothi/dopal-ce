@@ -1,4 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { FaExclamation } from 'react-icons/fa'
 import './Tasks.css'
 
 // ---- Icons ----
@@ -39,6 +40,7 @@ function ClockIcon() {
     </svg>
   )
 }
+
 
 function PlayIcon() {
   return (
@@ -360,7 +362,10 @@ function TodoCard({ task, isDragging, onDragHandleDown, onPin, onEdit, onDelete 
         </div>
         {task.description && <span className="todo-desc" style={textStyle}>{task.description}</span>}
         {dateLabel && (
-          <span className="todo-date" style={textStyle}><ClockIcon />{dateLabel}</span>
+          <span className="todo-date" style={textStyle}>
+            {task.dueDate && isDatePast(task.dueDate) ? <FaExclamation /> : <ClockIcon />}
+            {dateLabel}
+          </span>
         )}
       </div>
       <button className="play-section" style={{ background: playBg, color: task.color ? darkColor : '#355c9f' }}>
