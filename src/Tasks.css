@@ -101,10 +101,13 @@
 }
 
 .tasks-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: #355c9f;
   font-size: 12px;
-  margin-top: 28px;
   opacity: 0.75;
 }
 
@@ -558,6 +561,15 @@
 
 .delete-title    { font-size: 14px; font-weight: 700; color: #1e3a70; }
 .delete-subtitle { font-size: 12px; color: #355c9f; }
+
+.delete-task-title {
+  display: inline-block;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
 
 .delete-actions { display: flex; gap: 8px; }
 

@@ -261,7 +261,9 @@ function DeleteConfirm({ task, onConfirm, onCancel }) {
     <div className={`modal-backdrop ${closing ? 'backdrop-out' : 'backdrop-in'}`} onClick={handleClose}>
       <div className={`delete-modal ${closing ? 'modal-out' : 'modal-in'}`} onClick={e => e.stopPropagation()}>
         <p className="delete-title">Delete this {task.type}?</p>
-        <p className="delete-subtitle">"{task.title}" will be permanently removed.</p>
+        <p className="delete-subtitle">
+          "<span className="delete-task-title">{task.title}</span>" will be permanently removed.
+        </p>
         <div className="delete-actions">
           <button className="delete-cancel-btn" onClick={handleClose}>Cancel</button>
           <button className="delete-confirm-btn" onClick={onConfirm}>Delete</button>
@@ -489,7 +491,7 @@ export default function Tasks({ onClose }) {
 
         <div className="tasks-list" ref={listRef}>
           {displayTasks.length === 0 && (
-            <p className="tasks-empty">No tasks yet — hit + New to add one!</p>
+            <p className="tasks-empty">No tasks yet... hit "+ New" and get started!</p>
           )}
           {displayTasks.map((task, idx) => (
             <div key={task.id}>
