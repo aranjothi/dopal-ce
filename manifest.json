@@ -4,12 +4,14 @@
   "version": "0.1.0",
   "description": "Your productivity pet companion",
   "action": {
-    "default_popup": "index.html"
+    "default_popup": "popup.html"
+  },
+  "side_panel": {
+    "default_path": "index.html"
   },
   "background": {
     "service_worker": "src/background/index.js",
     "type": "module"
   },
-  "permissions": ["storage", "alarms"]
+  "permissions": ["storage", "alarms", "sidePanel"]
 }
-

@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,300..700;1,300..700&display=swap');
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,28 +7,67 @@
 }
 
 html {
-  height: 442px;
+  height: 100vh;
   overflow: hidden;
-  /* zoom: 0.95; */
 }
 
 body {
-  width: 320px;
-  height: 442px;
-  background-color: #1a1a2e;
-  background-image: url('./assets/ui/dopal_bg.png');
-  background-size: 768px auto;
-  background-repeat: no-repeat;
-  background-position: left bottom -35px;
+  width: 100%;
+  height: 100vh;
+  background-color: #0d1117;
+  background-image: url('./assets/ui/tab_bg.png');
+  background-size: cover;
+  background-position: center;
   overflow: hidden;
-  color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Elms Sans', 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
+  color: #e0e0e0;
 }
 
+/* ---- Phone frame ---- */
+
+.phone-container {
+  position: relative;
+  width: 360px;
+  height: 679px;
+  flex-shrink: 0;
+}
+
+.phone-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  pointer-events: none;
+  user-select: none;
+}
+
+.phone-screen {
+  position: absolute;
+  top: 24px;
+  left: 15px;
+  width: 330px;
+  height: 630px;
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+/* ---- App (inside phone screen) ---- */
+
 .app {
-  padding: 14px;
-  padding-top: 8px;
+  width: 100%;
+  height: 100%;
+  background-color: #1a1a2e;
+  background-image: url('./assets/ui/dopal_bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  padding: 20px;
+  padding-top: 35px;
   padding-bottom: 12px;
   display: flex;
   flex-direction: column;
@@ -297,7 +337,7 @@ body {
 
 .treat-group {
   position: absolute;
-  bottom: 0px;
+  bottom: -135px;
   left: 12px;
 }
 
@@ -330,16 +370,18 @@ body {
   transform: rotate(45deg);
 }
 
-@keyframes pet-rock-full   { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-8deg)}   50%{transform:translateX(28px) translateY(-15px) rotate(5deg)}   }
-@keyframes pet-rock-high   { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-6deg)}   50%{transform:translateX(28px) translateY(-15px) rotate(3.5deg)} }
-@keyframes pet-rock-medium { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-4deg)}   50%{transform:translateX(28px) translateY(-15px) rotate(2.5deg)} }
-@keyframes pet-rock-low    { 0%,100%{transform:translateX(28px) translateY(-15px) rotate(-1.5deg)} 50%{transform:translateX(28px) translateY(-15px) rotate(1deg)}   }
+@keyframes pet-rock-full   { 0%,100%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(-8deg)}   50%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(5deg)}   }
+@keyframes pet-rock-high   { 0%,100%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(-6deg)}   50%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(3.5deg)} }
+@keyframes pet-rock-medium { 0%,100%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(-4deg)}   50%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(2.5deg)} }
+@keyframes pet-rock-low    { 0%,100%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(-1.5deg)} 50%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(1deg)}   }
 
 .pet-sprite {
   position: absolute;
   width: 188px;
   height: auto;
-  transform: translateX(28px) translateY(-15px);
+  --pet-x: 28px;
+  --pet-y: 110px;
+  transform: translateX(var(--pet-x)) translateY(var(--pet-y));
   transform-origin: center bottom;
 }
 
@@ -350,7 +392,7 @@ body {
 
 /* Session overlay */
 .session-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;

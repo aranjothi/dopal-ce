@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=DynaPuff&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 260px;
+  height: 84px;
+  background: #1a1a2e;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.popup-root {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  height: 100%;
+}
+
+.popup-logo {
+  font-family: 'DynaPuff', system-ui, sans-serif;
+  font-size: 20px;
+  color: #b1cff3;
+}
+
+.toggle-switch {
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-switch.on  { background: #355c9f; }
+.toggle-switch.off { background: #374151; }
+
+.toggle-knob {
+  position: absolute;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: left 0.2s;
+}
+
+.toggle-switch.on  .toggle-knob { left: 24px; }
+.toggle-switch.off .toggle-knob { left: 4px; }

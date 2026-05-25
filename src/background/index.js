@@ -1,3 +1,10 @@
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (reason === 'install') {
+    chrome.sidePanel.setOptions({ path: 'index.html', enabled: false })
+    chrome.storage.local.set({ panelEnabled: false })
+  }
+})
+
 const DEFAULT_PET = {
   name: 'Pal',
   level: 1,

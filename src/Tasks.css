@@ -14,7 +14,7 @@
 /* ---- Screen ---- */
 
 .tasks-screen {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background-image: url('./assets/ui/tab_bg.png');
   background-size: cover;
@@ -22,7 +22,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 16px;
+  padding: 40px 16px;
   z-index: 200;
 }
 
