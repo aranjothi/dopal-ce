@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { FaGithub } from 'react-icons/fa'
+import dopalLogo from '../assets/ui/dopal_logo.png'
 import './PopupToggle.css'
 
 export default function PopupToggle() {
@@ -10,6 +12,14 @@ export default function PopupToggle() {
       setEnabled(!!panelEnabled)
       setLoading(false)
     })
+
+    function onStorageChange(changes) {
+      if ('panelEnabled' in changes) {
+        setEnabled(!!changes.panelEnabled.newValue)
+      }
+    }
+    chrome.storage.onChanged.addListener(onStorageChange)
+    return () => chrome.storage.onChanged.removeListener(onStorageChange)
   }, [])
 
   async function toggle() {
@@ -28,15 +38,32 @@ export default function PopupToggle() {
 
   return (
     <div className="popup-root">
-      <span className="popup-logo">DoPal</span>
-      <button
-        className={`toggle-switch ${enabled ? 'on' : 'off'}`}
-        onClick={toggle}
-        disabled={loading}
-        aria-label="Toggle side panel"
+      <div className="popup-pill popup-header">
+        <img src={dopalLogo} alt="DoPal logo" className="popup-logo-img" />
+        <span className="popup-logo">DoPal</span>
+      </div>
+
+      <div className="popup-pill popup-toggle-row">
+        <span className="toggle-label">Toggle Window</span>
+        <button
+          className={`toggle-switch ${enabled ? 'on' : 'off'}`}
+          onClick={toggle}
+          disabled={loading}
+          aria-label="Toggle side panel"
+        >
+          <span className="toggle-knob" />
+        </button>
+      </div>
+
+      <a
+        href="https://github.com/aranjothi/dopal-ce"
+        target="_blank"
+        rel="noreferrer"
+        className="popup-footer"
       >
-        <span className="toggle-knob" />
-      </button>
+        <FaGithub className="popup-github-icon" />
+        <span>GitHub</span>
+      </a>
     </div>
   )
 }

@@ -3,8 +3,20 @@
   "name": "DoPal",
   "version": "0.1.0",
   "description": "Your productivity pet companion",
+  "icons": {
+    "16":  "src/assets/ui/dopal_logo.png",
+    "32":  "src/assets/ui/dopal_logo.png",
+    "48":  "src/assets/ui/dopal_logo.png",
+    "128": "src/assets/ui/dopal_logo.png"
+  },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16":  "src/assets/ui/dopal_logo.png",
+      "32":  "src/assets/ui/dopal_logo.png",
+      "48":  "src/assets/ui/dopal_logo.png",
+      "128": "src/assets/ui/dopal_logo.png"
+    }
   },
   "side_panel": {
     "default_path": "index.html"

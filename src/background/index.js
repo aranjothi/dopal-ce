@@ -36,6 +36,14 @@ async function getActiveTask() {
   return result.activeTask ?? null
 }
 
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== 'sidepanel') return
+  port.onDisconnect.addListener(() => {
+    chrome.storage.local.set({ panelEnabled: false })
+    chrome.sidePanel.setOptions({ enabled: false })
+  })
+})
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   ;(async () => {
     switch (message.type) {
