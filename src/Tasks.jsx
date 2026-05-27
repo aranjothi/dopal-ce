@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { FaExclamation } from 'react-icons/fa'
+import coinImg from './assets/ui/coin.png'
 import './Tasks.css'
 
 // ---- Icons ----
@@ -87,6 +88,24 @@ function isDatePast(dateStr) {
   return date < today
 }
 
+function taskTotalMinutes(task) {
+  if (task.type === 'task') {
+    const [h, m, s] = (task.timeAllotted ?? '00:00:00').split(':').map(Number)
+    return h * 60 + m + s / 60
+  }
+  if (task.breaks) return (task.studyInterval ?? 0) * (task.numIntervals ?? 0)
+  return task.duration ?? 0
+}
+
+function formatDuration(totalMinutes) {
+  const mins = Math.floor(totalMinutes)
+  if (mins < 60) return `${mins} ${mins === 1 ? 'minute' : 'minutes'}`
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  const hourStr = `${h} ${h === 1 ? 'hour' : 'hours'}`
+  return m === 0 ? hourStr : `${hourStr} ${m} ${m === 1 ? 'minute' : 'minutes'}`
+}
+
 const TASK_COLORS = [
   { name: 'Red',    hex: '#fca5a5', dark: '#7f1d1d' },
   { name: 'Orange', hex: '#fdba74', dark: '#7c2d12' },
@@ -96,6 +115,45 @@ const TASK_COLORS = [
   { name: 'Purple', hex: '#d8b4fe', dark: '#4c1d95' },
   { name: 'Gray',   hex: '#d1d5db', dark: '#1f2937' },
 ]
+
+// ---- Start confirm modal ----
+
+function StartConfirmModal({ task, onClose, onBegin }) {
+  const [closing, setClosing] = useState(false)
+  const backdropDown = useRef(false)
+  const totalMinutes = taskTotalMinutes(task)
+  const coins = Math.floor(totalMinutes)
+
+  function handleClose() {
+    setClosing(true)
+    setTimeout(() => onClose(), 180)
+  }
+
+  return (
+    <div
+      className={`modal-backdrop ${closing ? 'backdrop-out' : 'backdrop-in'}`}
+      onMouseDown={e => { backdropDown.current = e.target === e.currentTarget }}
+      onClick={() => { if (backdropDown.current) handleClose() }}
+    >
+      <div className={`start-modal ${closing ? 'modal-out' : 'modal-in'}`} onClick={e => e.stopPropagation()}>
+        <p className="start-modal-title">Ready to Start?</p>
+
+        <div className="start-modal-time">
+          <ClockIcon />
+          <span>{formatDuration(totalMinutes)}</span>
+        </div>
+
+        <div className="start-modal-earn">
+          <span>You will earn</span>
+          <img src={coinImg} alt="coin" className="start-coin-img" />
+          <span className="start-coin-count">{coins}</span>
+        </div>
+
+        <button className="start-begin-btn" onClick={onBegin}>Begin</button>
+      </div>
+    </div>
+  )
+}
 
 // ---- New / Edit modal ----
 
@@ -327,7 +385,7 @@ function DeleteConfirm({ task, onConfirm, onCancel }) {
 
 // ---- Todo card ----
 
-function TodoCard({ task, isDragging, onDragHandleDown, onPin, onEdit, onDelete }) {
+function TodoCard({ task, isDragging, onDragHandleDown, onPin, onEdit, onDelete, onStart }) {
   const timeLabel = task.timeAllotted && task.timeAllotted !== '00:00:00' ? task.timeAllotted : null
   const dateLabel = task.dueDate
     ? formatDate(task.dueDate)
@@ -368,7 +426,7 @@ function TodoCard({ task, isDragging, onDragHandleDown, onPin, onEdit, onDelete 
           </span>
         )}
       </div>
-      <button className="play-section" style={{ background: playBg, color: task.color ? darkColor : '#355c9f' }}>
+      <button className="play-section" style={{ background: playBg, color: task.color ? darkColor : '#355c9f' }} onClick={() => onStart(task)}>
         <PlayIcon />
         <span className="play-label">Start</span>
       </button>
@@ -387,6 +445,7 @@ export default function Tasks({ onClose }) {
   const [showNewModal, setShowNewModal] = useState(false)
   const [editingTask, setEditingTask]   = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [startTarget, setStartTarget]   = useState(null)
   const [draggingId, setDraggingId]     = useState(null)
   const [dragInsertIdx, setDragInsertIdx] = useState(null)
   const listRef      = useRef(null)
@@ -571,6 +630,7 @@ export default function Tasks({ onClose }) {
                 onPin={handlePin}
                 onEdit={openEdit}
                 onDelete={setDeleteTarget}
+                onStart={setStartTarget}
               />
             </div>
           ))}
@@ -586,6 +646,14 @@ export default function Tasks({ onClose }) {
           task={deleteTarget}
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {startTarget && (
+        <StartConfirmModal
+          task={startTarget}
+          onClose={() => setStartTarget(null)}
+          onBegin={() => setStartTarget(null)}
         />
       )}
     </>

@@ -611,3 +611,73 @@
 }
 
 .delete-confirm-btn:hover { background: #dc2626; }
+
+/* ---- Start confirm modal ---- */
+
+.start-modal {
+  background: #e8f3ff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.start-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e3a70;
+}
+
+.start-modal-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #355c9f;
+}
+
+.start-modal-time svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.start-modal-earn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #355c9f;
+}
+
+.start-coin-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.start-coin-count {
+  font-weight: 700;
+  color: #1e3a70;
+}
+
+.start-begin-btn {
+  width: 100%;
+  padding: 9px;
+  background: #355c9f;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.start-begin-btn:hover { background: #1e3a70; }
