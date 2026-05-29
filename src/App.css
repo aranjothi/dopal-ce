@@ -4,6 +4,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-user-drag: none;
 }
 
 html {
@@ -303,9 +304,9 @@ body {
   transition: width 0.4s ease;
 }
 
-.bar-fill.xp     { background: linear-gradient(90deg, #355c9f, #7aadd4); }
-.bar-fill.hunger { background: linear-gradient(90deg, #f97316, #fb923c); }
-.bar-fill.mood   { background: linear-gradient(90deg, #ec4899, #f472b6); }
+.bar-fill.xp     { background: #355c9f; }
+.bar-fill.hunger { background: #f97316; }
+.bar-fill.mood   { background: #ec4899; }
 
 /* Card footer */
 .pet-card-footer {
@@ -544,4 +545,66 @@ body {
   padding: 32px;
   text-align: center;
   color: #6b7280;
+}
+
+/* ---- Coin reward pill ---- */
+
+@keyframes reward-pop-in {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes reward-pop-out {
+  from { transform: scale(1); opacity: 1; }
+  to   { transform: scale(0); opacity: 0; }
+}
+
+.coin-reward-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 500;
+  pointer-events: none;
+}
+
+.coin-reward-pill {
+  background: #b1cff3;
+  border: 2px solid #87afe6;
+  border-radius: 24px;
+  padding: 14px 28px;
+  width: 231px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(30, 58, 112, 0.25);
+}
+
+.coin-reward-pill.pill-in  { animation: reward-pop-in  0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.coin-reward-pill.pill-out { animation: reward-pop-out 0.32s ease-in forwards; }
+
+.reward-title {
+  font-family: 'DynaPuff', system-ui, sans-serif;
+  font-size: 14px;
+  color: #1e3a70;
+}
+
+.reward-coins-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reward-coin-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.reward-coin-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e3a70;
 }

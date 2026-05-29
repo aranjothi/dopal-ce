@@ -25,5 +25,5 @@
     "service_worker": "src/background/index.js",
     "type": "module"
   },
-  "permissions": ["storage", "alarms", "sidePanel"]
+  "permissions": ["storage", "alarms", "sidePanel", "notifications", "offscreen"]
 }

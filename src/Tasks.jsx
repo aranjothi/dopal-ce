@@ -439,7 +439,7 @@ function TodoCard({ task, isDragging, onDragHandleDown, onPin, onEdit, onDelete,
 
 // ---- Main Tasks screen ----
 
-export default function Tasks({ onClose }) {
+export default function Tasks({ onClose, onBeginTask }) {
   const [closing, setClosing]           = useState(false)
   const [tasks, setTasks]               = useState([])
   const [showNewModal, setShowNewModal] = useState(false)
@@ -653,7 +653,11 @@ export default function Tasks({ onClose }) {
         <StartConfirmModal
           task={startTarget}
           onClose={() => setStartTarget(null)}
-          onBegin={() => setStartTarget(null)}
+          onBegin={() => {
+            const task = startTarget
+            setStartTarget(null)
+            onBeginTask(task)
+          }}
         />
       )}
     </>

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import Tasks from './Tasks'
+import TimerScreen from './TimerScreen'
 import joyous    from './assets/pet/joyous.png'
 import happy     from './assets/pet/happy.png'
 import neutral   from './assets/pet/neutral.png'
@@ -146,16 +147,38 @@ export default function App() {
   const [remaining, setRemaining] = useState(null)
   const [showSession, setShowSession] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
+  const [timerTask, setTimerTask] = useState(null)
+  const [timerStartedAt, setTimerStartedAt] = useState(null)
+  const [coinReward, setCoinReward] = useState(null)
+  const [coinRewardFading, setCoinRewardFading] = useState(false)
   const timerRef = useRef(null)
 
   useEffect(() => {
-    Promise.all([
-      sendMessage({ type: 'GET_STATE' }),
-      sendMessage({ type: 'GET_ACTIVE_TASK' }),
-    ]).then(([stateRes, taskRes]) => {
-      setUserState(stateRes.payload)
-      setActiveTask(taskRes.payload)
+    async function init() {
+      try {
+        const [stateRes, taskRes] = await Promise.all([
+          sendMessage({ type: 'GET_STATE' }),
+          sendMessage({ type: 'GET_ACTIVE_TASK' }),
+        ])
+        setUserState(stateRes.payload)
+        setActiveTask(taskRes.payload)
+      } catch {
+        setTimeout(init, 500)
+      }
+    }
+    init()
+
+    chrome.storage.local.get('activeUITimer', ({ activeUITimer }) => {
+      if (!activeUITimer) return
+      setTimerTask(activeUITimer.task)
+      setTimerStartedAt(activeUITimer.startedAt)
     })
+
+    function onStorageChange(changes) {
+      if ('userState' in changes) setUserState(changes.userState.newValue)
+    }
+    chrome.storage.onChanged.addListener(onStorageChange)
+    return () => chrome.storage.onChanged.removeListener(onStorageChange)
   }, [])
 
   useEffect(() => {
@@ -183,6 +206,49 @@ export default function App() {
   async function handleCancel() {
     await sendMessage({ type: 'STOP_TASK' })
     setActiveTask(null)
+  }
+
+  function taskTotalSeconds(task) {
+    if (task.type === 'task') {
+      const [h, m, s] = (task.timeAllotted ?? '00:00:00').split(':').map(Number)
+      return h * 3600 + m * 60 + s
+    }
+    if (task.breaks) return (task.studyInterval ?? 0) * (task.numIntervals ?? 0) * 60
+    return (task.duration ?? 0) * 60
+  }
+
+  function handleBeginTask(task) {
+    setShowTasks(false)
+    const startedAt = Date.now()
+    setTimerTask(task)
+    setTimerStartedAt(startedAt)
+    chrome.runtime.sendMessage({
+      type: 'START_UI_TIMER',
+      payload: { task, startedAt, totalSeconds: taskTotalSeconds(task) },
+    })
+  }
+
+  async function handleMinimize() {
+    await chrome.sidePanel.setOptions({ enabled: false })
+  }
+
+  async function handleTaskFinish(coins) {
+    setTimerTask(null)
+    setTimerStartedAt(null)
+    chrome.runtime.sendMessage({ type: 'CANCEL_UI_TIMER' })
+    const res = await chrome.runtime.sendMessage({
+      type: 'ADD_COINS',
+      payload: { coins, xp: coins * 10 },
+    })
+    setUserState(res.payload)
+    if (coins > 0) {
+      setCoinRewardFading(false)
+      setCoinReward(coins)
+      setTimeout(() => {
+        setCoinRewardFading(true)
+        setTimeout(() => setCoinReward(null), 320)
+      }, 1800)
+    }
   }
 
   if (!userState) return <div className="loading">Loading...</div>
@@ -252,7 +318,7 @@ export default function App() {
                 iconClass="icon-hunger"
                 label="Hunger"
                 subtitle={getHungerMessage(pet.hunger)}
-                value={pet.hunger}
+                value={Math.ceil(pet.hunger)}
                 max={100}
                 barClass="hunger"
               />
@@ -281,7 +347,28 @@ export default function App() {
         </div>
 
         {showTasks && (
-          <Tasks onClose={() => setShowTasks(false)} />
+          <Tasks onClose={() => setShowTasks(false)} onBeginTask={handleBeginTask} />
+        )}
+
+        {timerTask && (
+          <TimerScreen
+            task={timerTask}
+            onFinish={handleTaskFinish}
+            onMinimize={handleMinimize}
+            startedAt={timerStartedAt}
+          />
+        )}
+
+        {coinReward !== null && (
+          <div className="coin-reward-wrapper">
+            <div className={`coin-reward-pill ${coinRewardFading ? 'pill-out' : 'pill-in'}`}>
+              <span className="reward-title">Task Complete</span>
+              <div className="reward-coins-row">
+                <img src={coinImg} alt="coin" className="reward-coin-img" />
+                <span className="reward-coin-text">+{coinReward}</span>
+              </div>
+            </div>
+          </div>
         )}
 
         {showSession && (
