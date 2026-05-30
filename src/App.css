@@ -5,6 +5,7 @@
   margin: 0;
   padding: 0;
   -webkit-user-drag: none;
+  user-select: none;
 }
 
 html {
@@ -49,10 +50,10 @@ body {
 
 .phone-screen {
   position: absolute;
-  top: 24px;
+  top: 20px;
   left: 15px;
   width: 330px;
-  height: 630px;
+  bottom: 4px;
   overflow: hidden;
   border-radius: 30px;
 }
@@ -78,8 +79,9 @@ body {
 /* Header */
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  gap: 3px;
 }
 
 .pet-pill {
@@ -88,7 +90,8 @@ body {
   gap: 7px;
   background: #b1cff3;
   border-radius: 20px;
-  padding: 4px 12px 4px 4px;
+  padding: 4px 6px 4px 4px;
+  height: 38px;
 }
 
 .pet-pill-avatar {
@@ -120,6 +123,10 @@ body {
   font-weight: 700;
   color: #1e3a70;
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 5ch;
 }
 
 .pet-pill-level {
@@ -127,15 +134,19 @@ body {
   font-weight: 600;
   color: #355c9f;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
   background: #b1cff3;
   border-radius: 20px;
   padding: 4px 10px;
+  height: 38px;
+  width: 205px;
+  flex-shrink: 0;
 }
 
 .nav-btn {
@@ -167,6 +178,7 @@ body {
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .coins {
@@ -327,15 +339,6 @@ body {
   flex-shrink: 0;
 }
 
-/* Pet sprite area */
-.pet-sprite-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 150px;
-}
-
 .treat-group {
   position: absolute;
   bottom: -135px;
@@ -349,18 +352,20 @@ body {
 
 .treat-label {
   position: absolute;
-  bottom: 15px;
+  bottom: 11px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  font-size: 13px;
+  width: 58px;
+  height: 22px;
   font-weight: 700;
   color: #1e3a70;
   background: #b1cff3;
   border-radius: 99px;
-  padding: 0px 10px 0px 6px;
+  overflow: hidden;
   white-space: nowrap;
 }
 
@@ -370,6 +375,16 @@ body {
   object-fit: contain;
   transform: rotate(45deg);
 }
+
+/* Pet sprite area */
+.pet-sprite-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+}
+
 
 @keyframes pet-rock-full   { 0%,100%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(-8deg)}   50%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(5deg)}   }
 @keyframes pet-rock-high   { 0%,100%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(-6deg)}   50%{transform:translateX(var(--pet-x)) translateY(var(--pet-y)) rotate(3.5deg)} }
@@ -608,3 +623,4 @@ body {
   font-weight: 700;
   color: #1e3a70;
 }
+

@@ -2,18 +2,19 @@ import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import Tasks from './Tasks'
 import TimerScreen from './TimerScreen'
+import Settings from './Settings'
 import joyous    from './assets/pet/joyous.png'
 import happy     from './assets/pet/happy.png'
 import neutral   from './assets/pet/neutral.png'
 import sad       from './assets/pet/sad.png'
 import angry     from './assets/pet/angry.png'
 import upset     from './assets/pet/upset.png'
-import coinImg   from './assets/ui/coin.png'
-import treatImg  from './assets/ui/treat.png'
-import emptyBowl from './assets/ui/empty_bowl.png'
-import fewBowl   from './assets/ui/few_bowl.png'
-import fullBowl  from './assets/ui/full_bowl.png'
-import phoneImg  from './assets/ui/phone_test.png'
+import coinImg      from './assets/ui/coin.png'
+import treatImg     from './assets/ui/treat.png'
+import emptyBowl   from './assets/ui/empty_bowl.png'
+import fewBowl     from './assets/ui/few_bowl.png'
+import fullBowl    from './assets/ui/full_bowl.png'
+import phoneImg     from './assets/ui/phone_test.png'
 
 const MOOD_IMAGES = [
   { threshold: 83, src: joyous  },
@@ -28,6 +29,12 @@ function getMoodImage(mood) {
   return (MOOD_IMAGES.find(m => mood > m.threshold) ?? MOOD_IMAGES.at(-1)).src
 }
 
+function getTreatBowl(treats) {
+  if (treats === 0) return emptyBowl
+  if (treats <= 5) return fewBowl
+  return fullBowl
+}
+
 function getRockClass(mood) {
   if (mood > 67) return 'rock-full'
   if (mood > 50) return 'rock-high'
@@ -36,11 +43,6 @@ function getRockClass(mood) {
   return ''
 }
 
-function getTreatBowl(treats) {
-  if (treats === 0) return emptyBowl
-  if (treats <= 5) return fewBowl
-  return fullBowl
-}
 
 function getXPMessage(xp, max) {
   const pct = (xp / max) * 100
@@ -132,6 +134,26 @@ function sendMessage(msg) {
   return chrome.runtime.sendMessage(msg)
 }
 
+function formatNum(n) {
+  if (n >= 1_000_000) return `${Math.floor(n / 1_000_000)}M+`
+  if (n >= 1_000) return `${Math.floor(n / 1_000)}K+`
+  return String(n)
+}
+
+function treatFontSize(coins) {
+  const len = formatNum(coins).length
+  if (len >= 5) return '10px'
+  if (len >= 4) return '11.5px'
+  return '13px'
+}
+
+function levelFontSize(level) {
+  const len = `Lvl ${formatNum(level)}`.length
+  if (len >= 9) return '7px'
+  if (len >= 8) return '7.5px'
+  return '9px'
+}
+
 function formatTime(ms) {
   const total = Math.max(0, Math.floor(ms / 1000))
   const m = Math.floor(total / 60).toString().padStart(2, '0')
@@ -147,6 +169,7 @@ export default function App() {
   const [remaining, setRemaining] = useState(null)
   const [showSession, setShowSession] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [timerTask, setTimerTask] = useState(null)
   const [timerStartedAt, setTimerStartedAt] = useState(null)
   const [coinReward, setCoinReward] = useState(null)
@@ -268,11 +291,11 @@ export default function App() {
               </div>
               <div className="pet-pill-info">
                 <span className="pet-pill-name">{pet.name}</span>
-                <span className="pet-pill-level">Level {pet.level}</span>
+                <span className="pet-pill-level" style={{ fontSize: levelFontSize(pet.level) }}>Lvl {formatNum(pet.level)}</span>
               </div>
             </div>
             <div className="nav-right">
-              <button className="nav-btn" title="Customize">
+              <button className="nav-btn" title="Style">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" d="M20.599 1.5c-.376 0-.743.111-1.055.32l-5.08 3.385a18.747 18.747 0 0 0-3.471 2.987 10.04 10.04 0 0 1 4.815 4.815 18.748 18.748 0 0 0 2.987-3.472l3.386-5.079A1.902 1.902 0 0 0 20.599 1.5Zm-8.3 14.025a18.76 18.76 0 0 0 1.896-1.207 8.026 8.026 0 0 0-4.513-4.513A18.75 18.75 0 0 0 8.475 11.7l-.278.5a5.26 5.26 0 0 1 3.601 3.602l.502-.278ZM6.75 13.5A3.75 3.75 0 0 0 3 17.25a1.5 1.5 0 0 1-1.601 1.497.75.75 0 0 0-.7 1.123 5.25 5.25 0 0 0 9.8-2.62 3.75 3.75 0 0 0-3.75-3.75Z" clipRule="evenodd" />
                 </svg>
@@ -290,7 +313,7 @@ export default function App() {
                 </svg>
                 <span className="nav-label">To-Dos</span>
               </button>
-              <button className="nav-btn" title="Settings">
+              <button className="nav-btn" title="Settings" onClick={() => setShowSettings(true)}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" d="M12 6.75a5.25 5.25 0 0 1 6.775-5.025.75.75 0 0 1 .313 1.248l-3.32 3.319c.063.475.276.934.641 1.299.365.365.824.578 1.3.64l3.318-3.319a.75.75 0 0 1 1.248.313 5.25 5.25 0 0 1-5.472 6.756c-1.018-.086-1.87.1-2.309.634L7.344 21.3A3.298 3.298 0 1 1 2.7 16.657l8.684-7.151c.533-.44.72-1.291.634-2.309A5.342 5.342 0 0 1 12 6.75ZM4.117 19.125a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clipRule="evenodd" />
                   <path d="m10.076 8.64-2.201-2.2V4.874a.75.75 0 0 0-.364-.643l-3.75-2.25a.75.75 0 0 0-.916.113l-.75.75a.75.75 0 0 0-.113.916l2.25 3.75a.75.75 0 0 0 .643.364h1.564l2.062 2.062 1.575-1.297Z" />
@@ -298,7 +321,7 @@ export default function App() {
                 </svg>
                 <span className="nav-label">Settings</span>
               </button>
-              <span className="coins"><img className="coin-icon" src={coinImg} alt="coins" />{coins}</span>
+              <span className="coins"><img className="coin-icon" src={coinImg} alt="coins" />{formatNum(coins)}</span>
             </div>
           </header>
 
@@ -334,20 +357,30 @@ export default function App() {
             </div>
           </div>
 
+
           <div className="pet-sprite-wrapper">
             <div className="treat-group">
               <img className="treat-bowl" src={getTreatBowl(coins)} alt="treat bowl" />
-              <div className="treat-label">
+              <div className="treat-label" style={{ fontSize: treatFontSize(coins) }}>
                 <img src={treatImg} alt="treat" className="treat-icon" />
-                <span>{coins}</span>
+                <span>{formatNum(coins)}</span>
               </div>
             </div>
             <img className={`pet-sprite ${getRockClass(pet.mood)}`} src={getMoodImage(pet.mood)} alt="pet" />
           </div>
+
         </div>
 
         {showTasks && (
           <Tasks onClose={() => setShowTasks(false)} onBeginTask={handleBeginTask} />
+        )}
+
+        {showSettings && (
+          <Settings
+            userState={userState}
+            onClose={() => setShowSettings(false)}
+            onApply={(newState) => { setUserState(newState); setShowSettings(false) }}
+          />
         )}
 
         {timerTask && (
