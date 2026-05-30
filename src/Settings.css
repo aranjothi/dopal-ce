@@ -55,7 +55,6 @@
 .settings-back-btn {
   display: flex;
   align-items: center;
-  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
@@ -63,12 +62,6 @@
   font-family: inherit;
   font-weight: 600;
   padding: 4px 8px;
-  width: 60px;
-}
-
-.settings-back-arrow {
-  font-size: 20px;
-  line-height: 1;
 }
 
 .settings-back-text {

@@ -34,6 +34,7 @@ async function getState() {
   const initial = {
     id: crypto.randomUUID(),
     coins: 0,
+    treats: 0,
     pet: { ...DEFAULT_PET },
   }
   await chrome.storage.local.set({ userState: initial })
@@ -214,7 +215,31 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         sendResponse({ type: 'UI_TIMER_CANCELLED' })
         break
       }
-case 'ADD_COINS': {
+case 'BUY_TREAT': {
+        const state = await getState()
+        if (state.coins < 10) {
+          sendResponse({ type: 'BUY_TREAT_FAILED' })
+          break
+        }
+        state.coins -= 10
+        state.treats = (state.treats ?? 0) + 1
+        await saveState(state)
+        sendResponse({ type: 'BUY_TREAT_SUCCESS', payload: state })
+        break
+      }
+      case 'USE_TREAT': {
+        const state = await getState()
+        if ((state.treats ?? 0) <= 0) {
+          sendResponse({ type: 'USE_TREAT_FAILED' })
+          break
+        }
+        state.treats -= 1
+        state.pet.hunger = Math.min(100, state.pet.hunger + 10)
+        await saveState(state)
+        sendResponse({ type: 'USE_TREAT_SUCCESS', payload: state })
+        break
+      }
+      case 'ADD_COINS': {
         const state = await getState()
         state.coins += message.payload.coins
         state.pet.xp += message.payload.xp ?? 0

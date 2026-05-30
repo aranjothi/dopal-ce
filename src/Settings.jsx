@@ -26,8 +26,7 @@ export default function Settings({ onClose, userState, onApply }) {
     <div className={`settings-screen ${closing ? 'settings-closing' : 'settings-opening'}`}>
       <div className="settings-header">
         <button className="settings-back-btn" onClick={handleClose}>
-          <span className="settings-back-arrow">‹</span>
-          <span className="settings-back-text">Back</span>
+          <span className="settings-back-text">← Back</span>
         </button>
         <div className="settings-title-pill">
           <span className="settings-title">Settings</span>

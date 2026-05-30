@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=DynaPuff&display=swap');
+
+@keyframes shop-bubble-in {
+  0%   { transform: scale(0.4); opacity: 0; }
+  70%  { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shop-bubble-out {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.4); opacity: 0; }
+}
+
+/* ---- Screen ---- */
+
+.shop-screen {
+  position: absolute;
+  inset: 0;
+  background-image: url('./assets/ui/tab_bg.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 20px;
+  z-index: 200;
+  gap: 20px;
+}
+
+.shop-opening { animation: shop-bubble-in  0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.shop-closing { animation: shop-bubble-out 0.22s ease-in forwards; }
+
+/* ---- Header ---- */
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.shop-title-pill {
+  background: #b1cff3;
+  border: 2px solid #87afe6;
+  border-radius: 99px;
+  padding: 8px 28px;
+}
+
+.shop-title {
+  font-family: 'DynaPuff', system-ui, sans-serif;
+  font-size: 18px;
+  color: #1e3a70;
+}
+
+.shop-back-btn {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1e3a70;
+  font-family: inherit;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+.shop-back-text {
+  font-size: 13px;
+  transition: font-size 0.15s ease;
+}
+
+.shop-back-btn:hover .shop-back-text { font-size: 16px; }
+
+.shop-balance {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #b1cff3;
+  border: 2px solid #87afe6;
+  border-radius: 99px;
+  padding: 6px 12px 6px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a70;
+  width: 60px;
+  justify-content: center;
+}
+
+.shop-balance-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+/* ---- Body ---- */
+
+.shop-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* ---- Item card ---- */
+
+.shop-item-card {
+  background: #b1cff3;
+  border: 2px solid #87afe6;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.shop-item-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.shop-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.shop-item-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a70;
+}
+
+.shop-item-desc {
+  font-size: 11px;
+  color: #355c9f;
+}
+
+.shop-buy-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #1e3a70;
+  border: none;
+  border-radius: 99px;
+  padding: 8px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.shop-buy-btn:hover:not(:disabled) { background: #142d58; }
+
+.shop-buy-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.shop-buy-coin {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}

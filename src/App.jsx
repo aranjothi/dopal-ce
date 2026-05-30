@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import './App.css'
 import Tasks from './Tasks'
 import TimerScreen from './TimerScreen'
 import Settings from './Settings'
+import Shop from './Shop'
 import joyous    from './assets/pet/joyous.png'
 import happy     from './assets/pet/happy.png'
 import neutral   from './assets/pet/neutral.png'
@@ -170,11 +171,15 @@ export default function App() {
   const [showSession, setShowSession] = useState(false)
   const [showTasks, setShowTasks] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showShop, setShowShop] = useState(false)
+  const [draggingTreat, setDraggingTreat] = useState(false)
+  const [treatCursorPos, setTreatCursorPos] = useState({ x: 0, y: 0 })
   const [timerTask, setTimerTask] = useState(null)
   const [timerStartedAt, setTimerStartedAt] = useState(null)
   const [coinReward, setCoinReward] = useState(null)
   const [coinRewardFading, setCoinRewardFading] = useState(false)
   const timerRef = useRef(null)
+  const petSpriteRef = useRef(null)
 
   useEffect(() => {
     async function init() {
@@ -274,9 +279,50 @@ export default function App() {
     }
   }
 
+  async function handleFeedPet() {
+    const res = await chrome.runtime.sendMessage({ type: 'USE_TREAT' })
+    if (res.type === 'USE_TREAT_SUCCESS') setUserState(res.payload)
+  }
+
+  function handleTreatDragStart(e) {
+    if ((userState.treats ?? 0) <= 0) return
+    e.preventDefault()
+    setDraggingTreat(true)
+    setTreatCursorPos({ x: e.clientX, y: e.clientY })
+  }
+
+  useEffect(() => {
+    if (!draggingTreat) return
+    function onMove(e) {
+      setTreatCursorPos({ x: e.clientX, y: e.clientY })
+    }
+    function onUp(e) {
+      setDraggingTreat(false)
+      const petEl = petSpriteRef.current
+      if (petEl) {
+        const rect = petEl.getBoundingClientRect()
+        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top  && e.clientY <= rect.bottom) {
+          handleFeedPet()
+        }
+      }
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+  }, [draggingTreat])
+
+  useEffect(() => {
+    document.body.style.cursor = draggingTreat ? 'grabbing' : ''
+    return () => { document.body.style.cursor = '' }
+  }, [draggingTreat])
+
   if (!userState) return <div className="loading">Loading...</div>
 
-  const { pet, coins } = userState
+  const { pet, coins, treats = 0 } = userState
   const xpMax = pet.level * 100
 
   return (
@@ -301,7 +347,7 @@ export default function App() {
                 </svg>
                 <span className="nav-label">Style</span>
               </button>
-              <button className="nav-btn" title="Shop">
+              <button className="nav-btn" title="Shop" onClick={() => setShowShop(true)}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z" clipRule="evenodd" />
                 </svg>
@@ -359,14 +405,23 @@ export default function App() {
 
 
           <div className="pet-sprite-wrapper">
-            <div className="treat-group">
-              <img className="treat-bowl" src={getTreatBowl(coins)} alt="treat bowl" />
-              <div className="treat-label" style={{ fontSize: treatFontSize(coins) }}>
+            <div
+              className="treat-group"
+              onMouseDown={handleTreatDragStart}
+              style={{ cursor: treats > 0 ? 'grab' : 'default' }}
+            >
+              <img className="treat-bowl" src={getTreatBowl(treats)} alt="treat bowl" />
+              <div className="treat-label" style={{ fontSize: treatFontSize(treats) }}>
                 <img src={treatImg} alt="treat" className="treat-icon" />
-                <span>{formatNum(coins)}</span>
+                <span>{formatNum(treats)}</span>
               </div>
             </div>
-            <img className={`pet-sprite ${getRockClass(pet.mood)}`} src={getMoodImage(pet.mood)} alt="pet" />
+            <img
+              ref={petSpriteRef}
+              className={`pet-sprite ${getRockClass(pet.mood)}`}
+              src={getMoodImage(pet.mood)}
+              alt="pet"
+            />
           </div>
 
         </div>
@@ -380,6 +435,14 @@ export default function App() {
             userState={userState}
             onClose={() => setShowSettings(false)}
             onApply={(newState) => { setUserState(newState); setShowSettings(false) }}
+          />
+        )}
+
+        {showShop && (
+          <Shop
+            userState={userState}
+            onClose={() => setShowShop(false)}
+            onUpdate={(newState) => { setUserState(newState) }}
           />
         )}
 
@@ -449,6 +512,24 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {draggingTreat && (
+        <img
+          src={treatImg}
+          style={{
+            position: 'fixed',
+            left: treatCursorPos.x - 15,
+            top: treatCursorPos.y - 15,
+            width: 30,
+            height: 30,
+            objectFit: 'contain',
+            transform: 'rotate(45deg)',
+            pointerEvents: 'none',
+            zIndex: 9999,
+          }}
+          alt=""
+        />
+      )}
     </div>
   )
 }
