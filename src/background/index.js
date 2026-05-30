@@ -16,6 +16,7 @@ async function ensureHungerAlarm() {
 }
 
 const HUNGER_DECAY_PER_MIN = 100 / 852
+const MOOD_DECAY_PER_MIN   = 100 / 1440
 
 const DEFAULT_PET = {
   name: 'Pal',
@@ -56,6 +57,7 @@ function applyHungerDecay(state) {
   const mins = (now - last) / 60_000
   if (mins > 0) {
     state.pet.hunger = Math.max(0, state.pet.hunger - HUNGER_DECAY_PER_MIN * mins)
+    state.pet.mood   = Math.max(0, state.pet.mood   - MOOD_DECAY_PER_MIN   * mins)
     state.pet.lastDecayAt = now
   }
   return state
@@ -243,6 +245,7 @@ case 'BUY_TREAT': {
         const state = await getState()
         state.coins += message.payload.coins
         state.pet.xp += message.payload.xp ?? 0
+        state.pet.mood = Math.min(100, state.pet.mood + (message.payload.mood ?? 0))
         state.pet.lastActiveAt = Date.now()
         const xpNeeded = state.pet.level * 100
         if (state.pet.xp >= xpNeeded) {
@@ -289,6 +292,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     const minutes = task.durationMs / 60_000
     state.coins += Math.floor(minutes)
     state.pet.xp += Math.floor(minutes * 10)
+    state.pet.mood = Math.min(100, state.pet.mood + Math.floor(minutes * 0.75))
     state.pet.lastActiveAt = Date.now()
 
     const xpNeeded = state.pet.level * 100

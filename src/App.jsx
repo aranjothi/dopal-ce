@@ -178,6 +178,10 @@ export default function App() {
   const [timerStartedAt, setTimerStartedAt] = useState(null)
   const [coinReward, setCoinReward] = useState(null)
   const [coinRewardFading, setCoinRewardFading] = useState(false)
+  const [feedNotif, setFeedNotif] = useState(null)
+  const [feedNotifFading, setFeedNotifFading] = useState(false)
+  const [feedNotifKey, setFeedNotifKey] = useState(0)
+  const feedNotifTimers = useRef([])
   const timerRef = useRef(null)
   const petSpriteRef = useRef(null)
 
@@ -266,7 +270,7 @@ export default function App() {
     chrome.runtime.sendMessage({ type: 'CANCEL_UI_TIMER' })
     const res = await chrome.runtime.sendMessage({
       type: 'ADD_COINS',
-      payload: { coins, xp: coins * 10 },
+      payload: { coins, xp: coins * 10, mood: Math.floor(coins * 0.75) },
     })
     setUserState(res.payload)
     if (coins > 0) {
@@ -280,6 +284,17 @@ export default function App() {
   }
 
   async function handleFeedPet() {
+    if (Math.ceil(userState.pet.hunger) >= 100) {
+      feedNotifTimers.current.forEach(clearTimeout)
+      setFeedNotifFading(false)
+      setFeedNotif(`${userState.pet.name}'s hunger already satisfied!`)
+      setFeedNotifKey(k => k + 1)
+      feedNotifTimers.current = [
+        setTimeout(() => setFeedNotifFading(true), 2700),
+        setTimeout(() => setFeedNotif(null), 3000),
+      ]
+      return
+    }
     const res = await chrome.runtime.sendMessage({ type: 'USE_TREAT' })
     if (res.type === 'USE_TREAT_SUCCESS') setUserState(res.payload)
   }
@@ -332,7 +347,7 @@ export default function App() {
         <div className="app">
           <header className="header">
             <div className="pet-pill">
-              <div className="pet-pill-avatar">
+              <div className={`pet-pill-avatar ${pet.mood <= 17 ? 'upset' : ''}`}>
                 <img src={getMoodImage(pet.mood)} alt={pet.name} />
               </div>
               <div className="pet-pill-info">
@@ -396,13 +411,20 @@ export default function App() {
                 iconClass="icon-mood"
                 label="Mood"
                 subtitle={getMoodMessage(pet.mood)}
-                value={pet.mood}
+                value={Math.ceil(pet.mood)}
                 max={100}
                 barClass="mood"
               />
             </div>
           </div>
 
+          <div style={{ position: 'relative', height: 0 }}>
+            {feedNotif && (
+              <div key={feedNotifKey} className={`feed-notif ${feedNotifFading ? 'feed-notif-out' : 'feed-notif-in'}`}>
+                {feedNotif}
+              </div>
+            )}
+          </div>
 
           <div className="pet-sprite-wrapper">
             <div
@@ -418,7 +440,7 @@ export default function App() {
             </div>
             <img
               ref={petSpriteRef}
-              className={`pet-sprite ${getRockClass(pet.mood)}`}
+              className={`pet-sprite ${getRockClass(pet.mood)} ${pet.mood <= 17 ? 'pet-upset' : ''}`.trim()}
               src={getMoodImage(pet.mood)}
               alt="pet"
             />

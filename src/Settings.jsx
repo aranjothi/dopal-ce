@@ -4,6 +4,9 @@ import './Settings.css'
 export default function Settings({ onClose, userState, onApply }) {
   const [closing, setClosing] = useState(false)
   const [name, setName] = useState(userState.pet.name)
+  const [level, setLevel] = useState(String(userState.pet.level))
+  const [coins, setCoins] = useState(String(userState.coins))
+  const [mood, setMood] = useState(String(Math.round(userState.pet.mood)))
 
   function handleClose() {
     setClosing(true)
@@ -13,9 +16,12 @@ export default function Settings({ onClose, userState, onApply }) {
   async function handleApply() {
     const newState = {
       ...userState,
+      coins: Math.max(0, parseInt(coins, 10) || 0),
       pet: {
         ...userState.pet,
         name: name.trim() || userState.pet.name,
+        level: Math.max(1, parseInt(level, 10) || 1),
+        mood: Math.min(100, Math.max(0, parseInt(mood, 10) || 0)),
       },
     }
     await chrome.storage.local.set({ userState: newState })
@@ -44,6 +50,40 @@ export default function Settings({ onClose, userState, onApply }) {
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Pal"
+            />
+          </div>
+          <div className="settings-divider" />
+          <div className="settings-row">
+            <label className="settings-label">Level</label>
+            <input
+              className="settings-input"
+              type="number"
+              min="1"
+              value={level}
+              onChange={e => setLevel(e.target.value)}
+            />
+          </div>
+          <div className="settings-divider" />
+          <div className="settings-row">
+            <label className="settings-label">Coins</label>
+            <input
+              className="settings-input"
+              type="number"
+              min="0"
+              value={coins}
+              onChange={e => setCoins(e.target.value)}
+            />
+          </div>
+          <div className="settings-divider" />
+          <div className="settings-row">
+            <label className="settings-label">Mood</label>
+            <input
+              className="settings-input"
+              type="number"
+              min="0"
+              max="100"
+              value={mood}
+              onChange={e => setMood(e.target.value)}
             />
           </div>
         </div>
