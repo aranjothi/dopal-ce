@@ -120,9 +120,10 @@ const TASK_COLORS = [
 
 function StartConfirmModal({ task, onClose, onBegin }) {
   const [closing, setClosing] = useState(false)
+  const [focusMode, setFocusMode] = useState(false)
   const backdropDown = useRef(false)
   const totalMinutes = taskTotalMinutes(task)
-  const coins = Math.floor(totalMinutes)
+  const coins = Math.floor(totalMinutes) * (focusMode ? 2 : 1)
 
   function handleClose() {
     setClosing(true)
@@ -146,10 +147,19 @@ function StartConfirmModal({ task, onClose, onBegin }) {
         <div className="start-modal-earn">
           <span>You will earn</span>
           <img src={coinImg} alt="coin" className="start-coin-img" />
-          <span className="start-coin-count">{coins}</span>
+          <span className="start-coin-count">{focusMode ? `${coins} (2×)` : coins}</span>
         </div>
 
-        <button className="start-begin-btn" onClick={onBegin}>Begin</button>
+        <div className="focus-mode-row" onClick={() => setFocusMode(f => !f)}>
+          <span className="focus-mode-label">Focus Mode</span>
+          <div className={`focus-toggle ${focusMode ? 'focus-toggle-on' : ''}`} />
+        </div>
+
+        {focusMode && (
+          <p className="focus-mode-note">Camera required · panel stays open</p>
+        )}
+
+        <button className="start-begin-btn" onClick={() => onBegin(focusMode)}>Begin</button>
       </div>
     </div>
   )
@@ -653,10 +663,10 @@ export default function Tasks({ onClose, onBeginTask }) {
         <StartConfirmModal
           task={startTarget}
           onClose={() => setStartTarget(null)}
-          onBegin={() => {
+          onBegin={(focusMode) => {
             const task = startTarget
             setStartTarget(null)
-            onBeginTask(task)
+            onBeginTask(task, focusMode)
           }}
         />
       )}

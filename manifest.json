@@ -25,5 +25,8 @@
     "service_worker": "src/background/index.js",
     "type": "module"
   },
-  "permissions": ["storage", "alarms", "sidePanel", "notifications", "offscreen"]
+  "permissions": ["storage", "alarms", "sidePanel", "notifications", "offscreen"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  }
 }

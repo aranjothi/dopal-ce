@@ -245,7 +245,9 @@ case 'BUY_TREAT': {
         const state = await getState()
         state.coins += message.payload.coins
         state.pet.xp += message.payload.xp ?? 0
-        state.pet.mood = Math.min(100, state.pet.mood + (message.payload.mood ?? 0))
+        const moodReward = message.payload.mood ?? 0
+        const moodPenalty = message.payload.moodPenalty ?? 0
+        state.pet.mood = Math.max(0, Math.min(100, state.pet.mood + moodReward - moodPenalty))
         state.pet.lastActiveAt = Date.now()
         const xpNeeded = state.pet.level * 100
         if (state.pet.xp >= xpNeeded) {

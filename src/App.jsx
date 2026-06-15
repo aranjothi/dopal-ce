@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import './App.css'
 import Tasks from './Tasks'
 import TimerScreen from './TimerScreen'
+import CameraCheckScreen from './CameraCheckScreen'
 import Settings from './Settings'
 import Shop from './Shop'
 import joyous    from './assets/pet/joyous.png'
@@ -176,8 +177,9 @@ export default function App() {
   const [treatCursorPos, setTreatCursorPos] = useState({ x: 0, y: 0 })
   const [timerTask, setTimerTask] = useState(null)
   const [timerStartedAt, setTimerStartedAt] = useState(null)
-  const [coinReward, setCoinReward] = useState(null)
-  const [coinRewardFading, setCoinRewardFading] = useState(false)
+  const [focusMode, setFocusMode] = useState(false)
+  const [cameraCheckPassed, setCameraCheckPassed] = useState(false)
+  const [completionData, setCompletionData] = useState(null)
   const [feedNotif, setFeedNotif] = useState(null)
   const [feedNotifFading, setFeedNotifFading] = useState(false)
   const [feedNotifKey, setFeedNotifKey] = useState(0)
@@ -249,14 +251,31 @@ export default function App() {
     return (task.duration ?? 0) * 60
   }
 
-  function handleBeginTask(task) {
+  function handleBeginTask(task, fm = false) {
     setShowTasks(false)
-    const startedAt = Date.now()
+    setFocusMode(fm)
+    setCameraCheckPassed(false)
     setTimerTask(task)
+
+    if (!fm) {
+      // Non-focus mode: start timer immediately
+      const startedAt = Date.now()
+      setTimerStartedAt(startedAt)
+      chrome.runtime.sendMessage({
+        type: 'START_UI_TIMER',
+        payload: { task, startedAt, totalSeconds: taskTotalSeconds(task) },
+      })
+    }
+    // Focus mode: timer starts only after camera check passes
+  }
+
+  function handleCameraCheckStart() {
+    const startedAt = Date.now()
     setTimerStartedAt(startedAt)
+    setCameraCheckPassed(true)
     chrome.runtime.sendMessage({
       type: 'START_UI_TIMER',
-      payload: { task, startedAt, totalSeconds: taskTotalSeconds(task) },
+      payload: { task: timerTask, startedAt, totalSeconds: taskTotalSeconds(timerTask) },
     })
   }
 
@@ -264,23 +283,24 @@ export default function App() {
     await chrome.sidePanel.setOptions({ enabled: false })
   }
 
-  async function handleTaskFinish(coins) {
+  async function handleTaskFinish({ elapsedSeconds, moodPenalty = 0 }) {
+    const fm = focusMode
+    const rawMinutes = elapsedSeconds / 60
+    const coins = Math.floor(rawMinutes) * (fm ? 2 : 1)
+    const xp = Math.floor(rawMinutes * 10) * (fm ? 2 : 1)
+    const moodReward = Math.floor(rawMinutes * 0.75)
+
     setTimerTask(null)
     setTimerStartedAt(null)
+    setFocusMode(false)
+    setCameraCheckPassed(false)
     chrome.runtime.sendMessage({ type: 'CANCEL_UI_TIMER' })
     const res = await chrome.runtime.sendMessage({
       type: 'ADD_COINS',
-      payload: { coins, xp: coins * 10, mood: Math.floor(coins * 0.75) },
+      payload: { coins, xp, mood: moodReward, moodPenalty },
     })
     setUserState(res.payload)
-    if (coins > 0) {
-      setCoinRewardFading(false)
-      setCoinReward(coins)
-      setTimeout(() => {
-        setCoinRewardFading(true)
-        setTimeout(() => setCoinReward(null), 320)
-      }, 1800)
-    }
+    setCompletionData({ coins, xp, moodReward, moodPenalty, focusMode: fm })
   }
 
   async function handleFeedPet() {
@@ -468,23 +488,53 @@ export default function App() {
           />
         )}
 
-        {timerTask && (
+        {timerTask && focusMode && !cameraCheckPassed && (
+          <CameraCheckScreen
+            onStart={handleCameraCheckStart}
+            onBack={() => {
+              setTimerTask(null)
+              setTimerStartedAt(null)
+              setFocusMode(false)
+            }}
+          />
+        )}
+
+        {timerTask && (!focusMode || cameraCheckPassed) && (
           <TimerScreen
             task={timerTask}
             onFinish={handleTaskFinish}
             onMinimize={handleMinimize}
             startedAt={timerStartedAt}
+            focusMode={focusMode}
           />
         )}
 
-        {coinReward !== null && (
-          <div className="coin-reward-wrapper">
-            <div className={`coin-reward-pill ${coinRewardFading ? 'pill-out' : 'pill-in'}`}>
-              <span className="reward-title">Task Complete</span>
-              <div className="reward-coins-row">
-                <img src={coinImg} alt="coin" className="reward-coin-img" />
-                <span className="reward-coin-text">+{coinReward}</span>
+        {completionData && (
+          <div className="completion-backdrop">
+            <div className="completion-modal">
+              <p className="completion-title">
+                {completionData.focusMode ? 'Focus Mode Complete!' : 'Task Complete!'}
+              </p>
+              <div className="completion-rewards">
+                <div className="completion-row">
+                  <img src={coinImg} alt="coin" className="completion-coin-img" />
+                  <span className="completion-earned">+{completionData.coins}</span>
+                </div>
+                <div className="completion-xp-row">
+                  +{completionData.xp} XP
+                </div>
+                {completionData.moodPenalty > 0 && (
+                  <div className="completion-penalty-row">
+                    <span>Mood -{completionData.moodPenalty.toFixed(1)}</span>
+                    <span className="completion-penalty-note">
+                      ({Math.round(completionData.moodPenalty * 2)}s looking away)
+                    </span>
+                  </div>
+                )}
               </div>
+              <button className="completion-done-btn" onClick={() => setCompletionData(null)}>
+                Done
+              </button>
             </div>
           </div>
         )}

@@ -681,3 +681,67 @@
 }
 
 .start-begin-btn:hover { background: #1e3a70; }
+
+.focus-2x-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: #355c9f;
+  border-radius: 99px;
+  padding: 2px 6px;
+}
+
+.focus-mode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  gap: 10px;
+  padding: 2px 0;
+}
+
+.focus-mode-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #355c9f;
+}
+
+.focus-toggle {
+  width: 36px;
+  height: 20px;
+  border-radius: 99px;
+  background: #b1cff3;
+  border: 2px solid #87afe6;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.focus-toggle::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.focus-toggle-on {
+  background: #355c9f;
+  border-color: #1e3a70;
+}
+
+.focus-toggle-on::after {
+  transform: translateX(16px);
+}
+
+.focus-mode-note {
+  font-size: 10px;
+  color: #6b8ab5;
+  text-align: center;
+  margin-top: -6px;
+}

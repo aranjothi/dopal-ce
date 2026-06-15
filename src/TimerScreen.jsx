@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { IoMdAlarm } from 'react-icons/io'
 import coinImg from './assets/ui/coin.png'
+import { useFaceDetection } from './useFaceDetection'
 import './TimerScreen.css'
-
 
 const TASK_COLOR_MAP = [
   { hex: '#fca5a5', dark: '#7f1d1d' },
@@ -36,7 +36,8 @@ function formatSeconds(total) {
   return [h, m, s].map(n => String(n).padStart(2, '0')).join(':')
 }
 
-function EndEarlyModal({ coins, onFinishEarly, onContinue }) {
+function EndEarlyModal({ elapsedSeconds, focusMode, onFinishEarly, onContinue }) {
+  const coins = Math.floor(elapsedSeconds / 60) * (focusMode ? 2 : 1)
   return (
     <div className="end-early-backdrop">
       <div className="end-early-modal">
@@ -54,22 +55,48 @@ function EndEarlyModal({ coins, onFinishEarly, onContinue }) {
   )
 }
 
-export default function TimerScreen({ task, onFinish, onMinimize, startedAt }) {
+export default function TimerScreen({ task, onFinish, onMinimize, startedAt, focusMode }) {
   const totalSeconds = taskTotalSeconds(task)
-  const computeInitial = () => startedAt
+  const initialSeconds = startedAt
     ? Math.max(0, totalSeconds - Math.floor((Date.now() - startedAt) / 1000))
     : totalSeconds
-  const initialSeconds = computeInitial()
+
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds)
   const [expired, setExpired] = useState(initialSeconds === 0)
   const [showEndEarly, setShowEndEarly] = useState(false)
-  const [snapshotCoins, setSnapshotCoins] = useState(0)
-  const intervalRef = useRef(null)
+  const [snapshotElapsed, setSnapshotElapsed] = useState(0)
+  const [moodFloaters, setMoodFloaters] = useState([])
 
+  const intervalRef = useRef(null)
+  const secondsLeftRef = useRef(initialSeconds)
+  const isPausedRef = useRef(false)
+
+  const { videoRef, faceCamReady, isLookingAway, getMoodPenalty } = useFaceDetection({ focusMode })
+
+  // Keep pause ref in sync with isLookingAway
+  useEffect(() => {
+    isPausedRef.current = isLookingAway
+  }, [isLookingAway])
+
+  // Spawn "-Mood" floaters every second while looking away
+  useEffect(() => {
+    if (!isLookingAway || !focusMode) return
+    function spawn() {
+      setMoodFloaters(prev => [...prev, {
+        id: Date.now() + Math.random(),
+        x: Math.random() * 65 + 10,
+        y: Math.random() * 45 + 20,
+      }])
+    }
+    spawn()
+    const id = setInterval(spawn, 1000)
+    return () => clearInterval(id)
+  }, [isLookingAway])
+
+  // Completion chime
   useEffect(() => {
     if (!expired) return
     const actx = new AudioContext()
-
     function scheduleChime() {
       const notes = [523.25, 659.25, 783.99, 1046.50]
       notes.forEach((freq, i) => {
@@ -87,49 +114,63 @@ export default function TimerScreen({ task, onFinish, onMinimize, startedAt }) {
         osc.stop(t + 1.0)
       })
     }
-
     scheduleChime()
     const id = setInterval(scheduleChime, 4000)
-    return () => {
-      clearInterval(id)
-      actx.close()
-    }
+    return () => { clearInterval(id); actx.close() }
   }, [expired])
 
+  // Countdown — skips ticks while paused
   useEffect(() => {
     if (initialSeconds === 0) return
     intervalRef.current = setInterval(() => {
+      if (isPausedRef.current) return
       setSecondsLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current)
-          setExpired(true)
-          return 0
-        }
-        return prev - 1
+        const next = prev - 1
+        secondsLeftRef.current = next
+        if (next <= 0) { clearInterval(intervalRef.current); setExpired(true); return 0 }
+        return next
       })
     }, 1000)
     return () => clearInterval(intervalRef.current)
   }, [])
 
-  const totalCoins = Math.floor(totalSeconds / 60)
-  const { pastel, dark } = resolveColors(task)
+  function getElapsedSeconds() {
+    return totalSeconds - secondsLeftRef.current
+  }
 
   function handleEndEarlyClick() {
-    const elapsed = totalSeconds - secondsLeft
-    setSnapshotCoins(Math.floor(elapsed / 60))
+    setSnapshotElapsed(getElapsedSeconds())
     setShowEndEarly(true)
   }
 
+  const { pastel, dark } = resolveColors(task)
+
   return (
     <div className="timer-screen">
-      <div
-        className="timer-container"
-        style={{ background: pastel, border: `2px solid ${dark}50` }}
-      >
+      {focusMode && <video ref={videoRef} style={{ display: 'none' }} playsInline muted />}
+
+      {/* Floating "-Mood" texts while looking away */}
+      {moodFloaters.map(f => (
         <div
-          className="timer-title-pill"
-          style={{ background: dark + '22', border: `1.5px solid ${dark}40` }}
+          key={f.id}
+          className="mood-floater"
+          style={{ left: `${f.x}%`, top: `${f.y}%` }}
+          onAnimationEnd={() => setMoodFloaters(prev => prev.filter(p => p.id !== f.id))}
         >
+          - Mood
+        </div>
+      ))}
+
+      <div className="timer-container" style={{ background: pastel, border: `2px solid ${dark}50` }}>
+        {focusMode && (
+          <div className="focus-badge" style={{ color: dark, borderColor: `${dark}40`, background: `${dark}18` }}>
+            {faceCamReady
+              ? isLookingAway ? '⏸ Paused' : 'Focus Mode · 2×'
+              : 'Loading camera...'}
+          </div>
+        )}
+
+        <div className="timer-title-pill" style={{ background: dark + '22', border: `1.5px solid ${dark}40` }}>
           <span className="timer-title-text" style={{ color: dark }}>{task.title}</span>
         </div>
 
@@ -144,19 +185,20 @@ export default function TimerScreen({ task, onFinish, onMinimize, startedAt }) {
         </div>
 
         <div className="timer-btn-group">
-          <button
-            className="timer-minimize-btn"
-            style={{ color: dark, borderColor: dark + '50' }}
-            onClick={onMinimize}
-          >
-            Minimize
-          </button>
-
+          {!focusMode && (
+            <button
+              className="timer-minimize-btn"
+              style={{ color: dark, borderColor: dark + '50' }}
+              onClick={onMinimize}
+            >
+              Minimize
+            </button>
+          )}
           {expired ? (
             <button
               className="timer-finish-btn"
               style={{ background: dark }}
-              onClick={() => onFinish(totalCoins)}
+              onClick={() => onFinish({ elapsedSeconds: totalSeconds, moodPenalty: getMoodPenalty() })}
             >
               Finish
             </button>
@@ -168,8 +210,9 @@ export default function TimerScreen({ task, onFinish, onMinimize, startedAt }) {
 
       {showEndEarly && (
         <EndEarlyModal
-          coins={snapshotCoins}
-          onFinishEarly={() => onFinish(snapshotCoins)}
+          elapsedSeconds={snapshotElapsed}
+          focusMode={focusMode}
+          onFinishEarly={() => onFinish({ elapsedSeconds: snapshotElapsed, moodPenalty: getMoodPenalty() })}
           onContinue={() => setShowEndEarly(false)}
         />
       )}
